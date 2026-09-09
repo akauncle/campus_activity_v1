@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}我发布的活动 · 校园活动管理系统{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>我发布的活动</h1>
+    <a class="btn btn-primary" href="{{ url_for('activities.new_activity') }}">发布活动</a>
+  </div>
+
+  {% if activities %}
+    <table class="table">
+      <thead>
+        <tr><th>主题</th><th>开始时间</th><th>报名情况</th><th>状态</th></tr>
+      </thead>
+      <tbody>
+        {% for a in activities %}
+          <tr>
+            <td><a href="{{ url_for('activities.detail', activity_id=a.id) }}">{{ a.title }}</a></td>
+            <td>{{ a.start_time }}</td>
+            <td>{{ a.reg_count }} / {{ capacity_text(a) }}</td>
+            <td><span class="badge badge-{{ statuses[a.id].key }}">{{ statuses[a.id].label }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">你还没有发布过活动。<a href="{{ url_for('activities.new_activity') }}">发布第一条活动</a></p>
+  {% endif %}
+{% endblock %}

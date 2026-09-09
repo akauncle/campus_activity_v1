@@ -16,7 +16,8 @@
           <span class="role-tag">{{ role_labels[current_user.role] }}</span>
         </span>
         {% if current_user.role == 'teacher' %}
-          <!-- 教师入口随功能落地逐步接入（发布/我的活动） -->
+          <a href="{{ url_for('activities.mine') }}">我发布的活动</a>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('activities.new_activity') }}">发布活动</a>
         {% endif %}
         <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
           <button type="submit" class="btn btn-link">退出</button>

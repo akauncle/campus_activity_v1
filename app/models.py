@@ -187,6 +187,15 @@ def list_activities_by_teacher(teacher_id):
     ).fetchall()
 
 
+def list_activities_by_teacher_with_stats(teacher_id):
+    """某教师发布的活动 + 报名人数（FR-11）。"""
+    return get_db().execute(
+        _STATS_SELECT + " WHERE a.teacher_id = ? GROUP BY a.id "
+                        "ORDER BY a.start_time DESC",
+        (teacher_id,),
+    ).fetchall()
+
+
 def set_activity_status(activity_id, status):
     db = get_db()
     db.execute("UPDATE activities SET status = ? WHERE id = ?", (status, activity_id))

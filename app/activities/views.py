@@ -3,10 +3,13 @@
 路由与需求对应见 docs/03-软件设计.md §5。所有状态/时间/归属校验都在
 本文件的服务端完成，页面只是展示入口。
 """
-from flask import abort, render_template, session
+from datetime import datetime
+
+from flask import abort, flash, redirect, render_template, request, session, url_for
 
 from app import models
 from app.activities import bp
+from app.auth.decorators import teacher_required
 
 # ------------------------------------------------------------- 派生展示状态
 # 设计决策 2（docs/03 §2.2）：数据库只存生命周期事件状态，这里按时间推导
@@ -97,3 +100,104 @@ def detail(activity_id):
                           and models.has_registration(activity["id"], user["id"])),
     }
     return render_template("activities/detail.html", **ctx)
+
+
+# ------------------------------------------------------------- 发布活动（FR-4，教师）
+
+def _normalize_time(raw):
+    """datetime-local 表单值 'YYYY-MM-DDTHH:MM' → 库格式 'YYYY-MM-DD HH:MM'。"""
+    if not raw:
+        return ""
+    return raw.strip().replace("T", " ")
+
+
+def _validate_activity_form(form, now):
+    """发布表单校验；返回 (errors, values)，values 为可入库的字段 dict。"""
+    errors = []
+    title = (form.get("title") or "").strip()
+    description = (form.get("description") or "").strip()
+    location = (form.get("location") or "").strip()
+    start_raw = _normalize_time(form.get("start_time"))
+    deadline_raw = _normalize_time(form.get("signup_deadline"))
+    capacity_raw = (form.get("capacity") or "").strip()
+
+    if not title:
+        errors.append("请填写活动主题")
+    if not description:
+        errors.append("请填写活动介绍")
+    if not location:
+        errors.append("请填写活动地点")
+
+    def valid_time(s):
+        try:
+            return datetime.strptime(s, models.TIME_FMT)
+        except ValueError:
+            return None
+
+    start_dt, deadline_dt = valid_time(start_raw), valid_time(deadline_raw)
+    if start_dt is None:
+        errors.append("活动开始时间格式不正确")
+    if deadline_dt is None:
+        errors.append("报名截止时间格式不正确")
+    if start_dt and start_dt <= datetime.now():
+        errors.append("活动开始时间必须晚于当前时间")
+    if deadline_dt and start_dt and deadline_dt >= start_dt:
+        errors.append("报名截止时间必须早于活动开始时间")
+    if deadline_dt and deadline_dt <= datetime.now():
+        errors.append("报名截止时间必须晚于当前时间（发布后应能报名）")
+
+    capacity = 0
+    if capacity_raw:
+        try:
+            capacity = int(capacity_raw)
+            if capacity < 0:
+                raise ValueError
+        except ValueError:
+            errors.append("人数上限须为非负整数（留空或 0 表示不限）")
+
+    if errors:
+        return errors, None
+    return [], {
+        "title": title, "description": description, "location": location,
+        "start_time": start_raw, "signup_deadline": deadline_raw,
+        "capacity": capacity,
+    }
+
+
+@bp.route("/activities/new", methods=("GET", "POST"))
+@teacher_required
+def new_activity():
+    """发布活动：表单 + 服务端时间/容量校验（FR-4）。"""
+    values = None
+    if request.method == "POST":
+        errors, values = _validate_activity_form(request.form, models.now_str())
+        if not errors:
+            activity_id = models.create_activity(
+                title=values["title"], description=values["description"],
+                location=values["location"], start_time=values["start_time"],
+                signup_deadline=values["signup_deadline"],
+                capacity=values["capacity"], teacher_id=session["user_id"],
+            )
+            flash(f"活动「{values['title']}」发布成功", "success")
+            return redirect(url_for("activities.detail", activity_id=activity_id))
+        return render_template(
+            "activities/new.html", errors=errors,
+            form={**request.form, "capacity": values["capacity"] if values else ""},
+        )
+    return render_template("activities/new.html", errors=[], form={})
+
+
+# ------------------------------------------------------------- 我发布的活动（FR-11，教师）
+
+@bp.route("/activities/mine")
+@teacher_required
+def mine():
+    """教师查看自己发布的活动与报名情况（管理入口，FR-11）。"""
+    activities = models.list_activities_by_teacher_with_stats(session["user_id"])
+    now = models.now_str()
+    return render_template(
+        "activities/mine.html",
+        activities=activities,
+        statuses={a["id"]: status_view(a, now) for a in activities},
+        capacity_text=capacity_text,
+    )
