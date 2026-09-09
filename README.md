@@ -72,7 +72,7 @@ docs/                 01 需求分析 · 02 工程意图 · 03 软件设计 · 0
 
 ## Git 说明
 
-仓库由成员2 本地初始化并逐步提交（12 个提交点反映开发过程），已同步双远程：
+仓库由成员2 本地初始化并逐步提交（13 个提交点反映开发过程），已同步双远程：
 
 ```bash
 git push origin   # GitHub: git@github.com:akauncle/campus_activity_v1.git
