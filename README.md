@@ -72,11 +72,11 @@ docs/                 01 需求分析 · 02 工程意图 · 03 软件设计 · 0
 
 ## Git 说明
 
-仓库由成员2 本地初始化并逐步提交（11 个提交点反映开发过程）；远程地址确认后：
+仓库由成员2 本地初始化并逐步提交（12 个提交点反映开发过程），已同步双远程：
 
 ```bash
-git remote add origin <仓库地址>
-git push -u origin main
+git push origin   # GitHub: git@github.com:akauncle/campus_activity_v1.git
+git push gitee    # Gitee:  git@gitee.com:akapioggia/campus_activity_v1.git
 ```
 
 ⚠ 提交规范：不提交 `*.db`、`instance/`、密钥 Token；演示密码属业务数据且以哈希存储。
