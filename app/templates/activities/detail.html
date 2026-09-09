@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.title }} · 校园活动管理系统{% endblock %}
+{% block content %}
+  <p><a href="{{ url_for('activities.index') }}">← 返回活动列表</a></p>
+
+  <article class="card detail-card">
+    <div class="activity-title-row">
+      <h1>{{ activity.title }}</h1>
+      <span class="badge badge-{{ status.key }}">{{ status.label }}</span>
+    </div>
+    <p class="muted">{{ status.note }}</p>
+
+    <table class="detail-table">
+      <tr><th>活动时间</th><td>{{ activity.start_time }}</td></tr>
+      <tr><th>报名截止</th><td>{{ activity.signup_deadline }}</td></tr>
+      <tr><th>地点</th><td>{{ activity.location }}</td></tr>
+      <tr><th>发布教师</th><td>{{ activity.teacher_name }}</td></tr>
+      <tr><th>人数上限</th><td>{{ capacity_text(activity) }}</td></tr>
+      <tr><th>已报名</th><td>{{ activity.reg_count }} 人</td></tr>
+    </table>
+
+    <section class="activity-desc">
+      <h3>活动介绍</h3>
+      <p style="white-space: pre-wrap;">{{ activity.description }}</p>
+    </section>
+  </article>
+{% endblock %}

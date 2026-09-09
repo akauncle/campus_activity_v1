@@ -109,13 +109,15 @@ def init_db(app):
 # ⚠ 成员1 用户模块对接约定：id / username / password_hash / role / nickname / created_at
 
 def create_user(username, password_hash, role, nickname):
-    """新建用户；用户名重复抛出 sqlite3.IntegrityError，由调用方转为友好提示。"""
+    """新建用户，返回新用户 id；用户名重复抛出 sqlite3.IntegrityError，
+    由调用方转为友好提示。"""
     db = get_db()
-    db.execute(
+    cur = db.execute(
         "INSERT INTO users (username, password_hash, role, nickname) VALUES (?, ?, ?, ?)",
         (username, password_hash, role, nickname),
     )
     db.commit()
+    return cur.lastrowid
 
 
 def get_user(user_id):
@@ -152,6 +154,30 @@ def list_activities():
     return get_db().execute(
         "SELECT * FROM activities ORDER BY start_time"
     ).fetchall()
+
+
+# 列表/详情通用查询列：带发布教师昵称与已报名人数
+_STATS_SELECT = """
+    SELECT a.*, u.nickname AS teacher_name,
+           COUNT(r.id) AS reg_count
+    FROM activities a
+    JOIN users u ON u.id = a.teacher_id
+    LEFT JOIN registrations r ON r.activity_id = a.id
+"""
+
+
+def list_activities_with_stats():
+    """全部活动 + 教师昵称 + 报名人数，按活动开始时间升序（FR-2）。"""
+    return get_db().execute(
+        _STATS_SELECT + " GROUP BY a.id ORDER BY a.start_time"
+    ).fetchall()
+
+
+def get_activity_with_stats(activity_id):
+    """单个活动 + 教师昵称 + 报名人数；不存在返回 None。"""
+    return get_db().execute(
+        _STATS_SELECT + " WHERE a.id = ? GROUP BY a.id", (activity_id,)
+    ).fetchone()
 
 
 def list_activities_by_teacher(teacher_id):

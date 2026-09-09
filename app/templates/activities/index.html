@@ -1,5 +1,33 @@
 {% extends "base.html" %}
+{% block title %}校园活动 · 校园活动管理系统{% endblock %}
 {% block content %}
-  <h1>校园活动</h1>
-  <p class="muted">活动列表建设中，下一步提交接入。</p>
+  <div class="page-head">
+    <h1>校园活动</h1>
+    {% if current_user and current_user.role == 'teacher' %}
+      <a class="btn btn-primary" href="{{ url_for('activities.new_activity') }}">发布活动</a>
+    {% endif %}
+  </div>
+
+  {% if activities %}
+    <div class="activity-list">
+      {% for a in activities %}
+        <article class="card activity-card">
+          <div class="activity-main">
+            <div class="activity-title-row">
+              <a class="activity-title" href="{{ url_for('activities.detail', activity_id=a.id) }}">
+                {{ a.title }}
+              </a>
+              <span class="badge badge-{{ statuses[a.id].key }}">{{ statuses[a.id].label }}</span>
+            </div>
+            <div class="muted">
+              时间：{{ a.start_time }} · 地点：{{ a.location }} · 发布：{{ a.teacher_name }}
+            </div>
+            <div class="muted">报名：{{ a.reg_count }} / {{ capacity_text(a) }}</div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">还没有活动，教师登录后可发布第一条活动。</p>
+  {% endif %}
 {% endblock %}
