@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}校园活动管理系统{% endblock %}</title>
+</head>
+<body>
+<header class="navbar">
+  <div class="nav-inner">
+    <a class="brand" href="{{ url_for('activities.index') }}">校园活动管理系统</a>
+    <nav class="nav-links">
+      {% if current_user %}
+        <span class="nav-user">
+          {{ current_user.nickname or current_user.username }}
+          <span class="role-tag">{{ role_labels[current_user.role] }}</span>
+        </span>
+        {% if current_user.role == 'teacher' %}
+          <!-- 教师入口随功能落地逐步接入（发布/我的活动） -->
+        {% endif %}
+        <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
+          <button type="submit" class="btn btn-link">退出</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">登录</a>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('auth.register') }}">注册</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">校园活动管理系统 V1.0 · 基于工程意图的软件迭代开发 · 小组作业</footer>
+</body>
+</html>

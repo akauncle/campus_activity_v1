@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}注册 · 校园活动管理系统{% endblock %}
+{% block content %}
+  <h1>注册</h1>
+  {% if errors %}
+    <div class="flash flash-error">
+      {% for e in errors %}<div>{{ e }}</div>{% endfor %}
+    </div>
+  {% endif %}
+  <form method="post" class="card form" style="max-width: 360px;">
+    <label>用户名
+      <input type="text" name="username" value="{{ form.get('username','') }}" required autofocus>
+    </label>
+    <label>昵称（可选）
+      <input type="text" name="nickname" value="{{ form.get('nickname','') }}" placeholder="不填则默认用用户名">
+    </label>
+    <label>身份
+      <select name="role" required>
+        <option value="">请选择</option>
+        <option value="student" {% if form.get('role')=='student' %}selected{% endif %}>学生</option>
+        <option value="teacher" {% if form.get('role')=='teacher' %}selected{% endif %}>教师</option>
+      </select>
+    </label>
+    <label>密码（至少 6 位）
+      <input type="password" name="password" required>
+    </label>
+    <label>确认密码
+      <input type="password" name="password2" required>
+    </label>
+    <button type="submit" class="btn btn-primary">注册</button>
+    <p class="muted">已有账号？<a href="{{ url_for('auth.login') }}">去登录</a></p>
+  </form>
+{% endblock %}
