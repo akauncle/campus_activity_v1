@@ -19,6 +19,44 @@
       <tr><th>已报名</th><td>{{ activity.reg_count }} 人</td></tr>
     </table>
 
+    {# 报名/取消操作区：按身份渲染，规则在服务端强制（FR-5/FR-6） #}
+    {% if not current_user %}
+      <div class="panel">
+        想参加这个活动？<a href="{{ url_for('auth.login') }}">登录</a>（学生身份）后即可报名；
+        没有账号请先<a href="{{ url_for('auth.register') }}">注册</a>。
+      </div>
+    {% elif current_user.role == 'student' %}
+      <div class="panel panel-actions">
+        {% if signed_up %}
+          <span class="chip chip-ok">✔ 已报名</span>
+          {% if can_unsign %}
+            <form method="post" action="{{ url_for('activities.unsignup', activity_id=activity.id) }}">
+              <button type="submit" class="btn btn-danger">取消报名</button>
+            </form>
+          {% else %}
+            <span class="muted">报名名单已锁定（已过截止时间或活动已结束），无法取消</span>
+          {% endif %}
+        {% elif can_signup %}
+          <form method="post" action="{{ url_for('activities.signup', activity_id=activity.id) }}">
+            <button type="submit" class="btn btn-primary">报名参加</button>
+          </form>
+        {% elif status.key == 'open' %}
+          <span class="muted">该活动名额已满，无法报名</span>
+        {% elif status.key == 'closed' %}
+          <span class="muted">报名已截止</span>
+        {% elif status.key == 'ongoing' %}
+          <span class="muted">活动已经开始，无法报名</span>
+        {% else %}
+          <span class="muted">活动{{ status.label }}，无法报名</span>
+        {% endif %}
+      </div>
+    {% elif current_user.role == 'teacher' %}
+      <div class="panel muted">
+        教师账号无需报名
+        {% if is_owner %}，这是你发布的活动{% endif %}。
+      </div>
+    {% endif %}
+
     <section class="activity-desc">
       <h3>活动介绍</h3>
       <p style="white-space: pre-wrap;">{{ activity.description }}</p>

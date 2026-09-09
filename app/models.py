@@ -246,6 +246,15 @@ def remove_registration(activity_id, student_id):
     db.commit()
 
 
+def list_signed_activity_ids(student_id):
+    """某学生已报名的活动 id 集合（列表页展示"已报名"标识）。"""
+    rows = get_db().execute(
+        "SELECT activity_id FROM registrations WHERE student_id = ?",
+        (student_id,),
+    ).fetchall()
+    return {r["activity_id"] for r in rows}
+
+
 def list_registrants(activity_id):
     """报名名单：学生昵称/账号/报名时间，按报名先后。"""
     return get_db().execute(

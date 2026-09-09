@@ -22,7 +22,10 @@
             <div class="muted">
               时间：{{ a.start_time }} · 地点：{{ a.location }} · 发布：{{ a.teacher_name }}
             </div>
-            <div class="muted">报名：{{ a.reg_count }} / {{ capacity_text(a) }}</div>
+            <div class="muted">
+              报名：{{ a.reg_count }} / {{ capacity_text(a) }}
+              {% if a.id in signed_ids %}<span class="chip chip-ok">✔ 已报名</span>{% endif %}
+            </div>
           </div>
         </article>
       {% endfor %}
