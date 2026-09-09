@@ -9,7 +9,7 @@
   {% if activities %}
     <table class="table">
       <thead>
-        <tr><th>主题</th><th>开始时间</th><th>报名情况</th><th>状态</th></tr>
+        <tr><th>主题</th><th>开始时间</th><th>报名情况</th><th>状态</th><th>操作</th></tr>
       </thead>
       <tbody>
         {% for a in activities %}
@@ -18,6 +18,19 @@
             <td>{{ a.start_time }}</td>
             <td>{{ a.reg_count }} / {{ capacity_text(a) }}</td>
             <td><span class="badge badge-{{ statuses[a.id].key }}">{{ statuses[a.id].label }}</span></td>
+            <td class="row-actions">
+              <a class="btn btn-sm" href="{{ url_for('activities.registrants', activity_id=a.id) }}">报名名单</a>
+              {% if statuses[a.id].key not in ['finished', 'cancelled'] %}
+                <form method="post" action="{{ url_for('activities.finish', activity_id=a.id) }}"
+                      class="inline-form" onsubmit="return confirm('确认将活动「{{ a.title }}」标记为已结束？结束后不可再报名。');">
+                  <button type="submit" class="btn btn-sm">结束</button>
+                </form>
+                <form method="post" action="{{ url_for('activities.cancel', activity_id=a.id) }}"
+                      class="inline-form" onsubmit="return confirm('确认取消活动「{{ a.title }}」？报名名单将保留备查。');">
+                  <button type="submit" class="btn btn-sm btn-danger">取消</button>
+                </form>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>

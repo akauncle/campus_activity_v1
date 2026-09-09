@@ -277,3 +277,52 @@ def unsignup(activity_id):
         models.remove_registration(activity_id, user["id"])
         flash(f"已取消报名：{activity['title']}", "info")
     return redirect(url_for("activities.detail", activity_id=activity_id))
+
+
+# ------------------------------------------------------------- 教师管理（FR-8/FR-9/FR-10）
+
+def _require_owner(activity):
+    """仅活动发布教师本人可管理，否则 403（权限矩阵见 docs/01 §4）。"""
+    if session.get("user_id") != activity["teacher_id"]:
+        abort(403)
+
+
+@bp.route("/activities/<int:activity_id>/registrants")
+@teacher_required
+def registrants(activity_id):
+    """报名名单（FR-8）。"""
+    activity = _get_activity_or_404(activity_id)
+    _require_owner(activity)
+    return render_template(
+        "activities/registrants.html",
+        activity=activity,
+        registrants=models.list_registrants(activity_id),
+    )
+
+
+@bp.route("/activities/<int:activity_id>/finish", methods=("POST",))
+@teacher_required
+def finish(activity_id):
+    """标记活动已结束（FR-9）：结束后不可再报名。"""
+    activity = _get_activity_or_404(activity_id)
+    _require_owner(activity)
+    if activity["status"] != models.STATUS_ACTIVE:
+        flash("该活动当前状态不可执行「结束」", "warning")
+    else:
+        models.set_activity_status(activity_id, models.STATUS_FINISHED)
+        flash(f"活动「{activity['title']}」已标记为结束", "info")
+    return redirect(url_for("activities.mine"))
+
+
+@bp.route("/activities/<int:activity_id>/cancel", methods=("POST",))
+@teacher_required
+def cancel(activity_id):
+    """取消活动（FR-10）：报名通道关闭，名单保留备查。"""
+    activity = _get_activity_or_404(activity_id)
+    _require_owner(activity)
+    if activity["status"] != models.STATUS_ACTIVE:
+        flash("该活动当前状态不可执行「取消」", "warning")
+    else:
+        models.set_activity_status(activity_id, models.STATUS_CANCELLED)
+        flash(f"活动「{activity['title']}」已取消，报名名单保留备查", "warning")
+    return redirect(url_for("activities.mine"))

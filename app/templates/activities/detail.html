@@ -53,8 +53,25 @@
     {% elif current_user.role == 'teacher' %}
       <div class="panel muted">
         教师账号无需报名
-        {% if is_owner %}，这是你发布的活动{% endif %}。
+        {% if is_owner %}，这是你发布的活动，可在此管理{% endif %}。
       </div>
+      {% if is_owner %}
+        <div class="panel panel-actions">
+          <a class="btn" href="{{ url_for('activities.registrants', activity_id=activity.id) }}">
+            查看报名名单（{{ activity.reg_count }} 人）
+          </a>
+          {% if status.key not in ['finished', 'cancelled'] %}
+            <form method="post" action="{{ url_for('activities.finish', activity_id=activity.id) }}"
+                  class="inline-form" onsubmit="return confirm('确认将活动「{{ activity.title }}」标记为已结束？');">
+              <button type="submit" class="btn">结束活动</button>
+            </form>
+            <form method="post" action="{{ url_for('activities.cancel', activity_id=activity.id) }}"
+                  class="inline-form" onsubmit="return confirm('确认取消活动「{{ activity.title }}」？报名名单将保留备查。');">
+              <button type="submit" class="btn btn-danger">取消活动</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
     {% endif %}
 
     <section class="activity-desc">

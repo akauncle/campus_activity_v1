@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}报名名单 · {{ activity.title }}{% endblock %}
+{% block content %}
+  <p><a href="{{ url_for('activities.mine') }}">← 返回我发布的活动</a></p>
+  <h1>报名名单：{{ activity.title }}</h1>
+  <p class="muted">
+    活动时间 {{ activity.start_time }} · 共 {{ registrants|length }} 人
+    （报名截止后名单锁定）
+  </p>
+
+  {% if registrants %}
+    <table class="table">
+      <thead>
+        <tr><th>#</th><th>昵称</th><th>账号</th><th>报名时间</th></tr>
+      </thead>
+      <tbody>
+        {% for r in registrants %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ r.nickname or '-' }}</td>
+            <td>{{ r.username }}</td>
+            <td>{{ r.signed_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">还没有学生报名这个活动。</p>
+  {% endif %}
+{% endblock %}
