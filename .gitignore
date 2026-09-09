@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 数据库与运行时数据（不入库，避免提交敏感/私有数据）
+*.db
+*.sqlite3
+instance/
+
+# IDE / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
