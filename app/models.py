@@ -1,9 +1,8 @@
 """数据访问层：集中全部表结构与 SQL。
 
-设计约定（见 docs/03-软件设计.md §3、§7）：
-- 仅依赖标准库 sqlite3，建表 DDL 与本文件逐字一致，可互相核对；
-- users 表属成员1 用户模块的对接约定，若队友表结构不同，只改本文件与
-  app/auth/ 两处即可完成对接；
+设计约定（见 docs/03-软件设计.md §3）：
+- 仅依赖标准库 sqlite3，建表 DDL 与设计文档逐字一致，可互相核对；
+- 三张表与全部 SQL 集中在本文件，视图层不出现散落 SQL；
 - 时间统一存本机时间字符串 'YYYY-MM-DD HH:MM'，字典序即时间序。
 """
 import sqlite3
@@ -106,7 +105,7 @@ def init_db(app):
 
 
 # ---------------------------------------------------------------- users
-# ⚠ 成员1 用户模块对接约定：id / username / password_hash / role / nickname / created_at
+# users 表字段：id / username(唯一) / password_hash / role / nickname / created_at
 
 def create_user(username, password_hash, role, nickname):
     """新建用户，返回新用户 id；用户名重复抛出 sqlite3.IntegrityError，

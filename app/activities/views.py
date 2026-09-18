@@ -1,4 +1,4 @@
-"""活动蓝图视图（★ 成员2 活动业务模块核心）。
+"""活动蓝图视图（★ 活动业务核心）。
 
 路由与需求对应见 docs/03-软件设计.md §5。所有状态/时间/归属校验都在
 本文件的服务端完成，页面只是展示入口。
@@ -78,7 +78,7 @@ def capacity_text(activity):
 
 
 def _current_user():
-    """当前登录用户行（依赖成员1对接约定的会话键，见 auth/decorators.py）。"""
+    """当前登录用户行（会话键见 auth/decorators.py）。"""
     uid = session.get("user_id")
     return models.get_user(uid) if uid else None
 

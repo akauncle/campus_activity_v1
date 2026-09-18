@@ -2,8 +2,8 @@
 
 模块组织（docs/03-软件设计.md §1）：
 - app/models.py   数据访问层（表 DDL + SQL 集中处）
-- app/auth/       账号蓝图 ⚠ 成员1 职责占位（对接点见 docs/03 §7）
-- app/activities/ 活动蓝图 ★ 成员2 活动业务模块
+- app/auth/       账号蓝图（注册/登录/登出 + 角色权限装饰器）
+- app/activities/ 活动蓝图 ★ 活动业务核心
 """
 import os
 

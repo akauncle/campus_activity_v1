@@ -1,4 +1,9 @@
-"""注册 / 登录 / 登出（成员1 用户模块占位实现，见目录 __init__ 说明）。"""
+"""注册 / 登录 / 登出（FR-1）。
+
+密码使用 werkzeug 单向哈希存储，不落明文；登录成功后写入会话约定键
+session['user_id'] 与 session['role']，供 app/auth/decorators.py 的
+权限装饰器与全部视图读取。
+"""
 import sqlite3
 
 from flask import flash, redirect, render_template, request, session, url_for
@@ -66,8 +71,8 @@ def login():
             errors.append("用户名或密码错误")
         else:
             session.clear()
-            session["user_id"] = user["id"]          # ← 对接约定键名
-            session["role"] = user["role"]           # ← 对接约定键名
+            session["user_id"] = user["id"]          # 会话约定：用户 id
+            session["role"] = user["role"]           # 会话约定：身份角色
             flash(f"欢迎回来，{user['nickname'] or user['username']}"
                   f"（{ROLE_LABELS[user['role']]}）", "success")
             return redirect(url_for("activities.index"))
