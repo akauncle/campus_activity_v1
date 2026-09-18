@@ -1,8 +1,9 @@
 """活动业务模块自动化测试（unittest，零第三方测试依赖）。
 
 运行：python -m unittest discover -s tests -v
-覆盖需求：FR-1（占位冒烟）、FR-2/3、FR-4、FR-5/6、FR-8/9/10
+覆盖需求：FR-2/3、FR-4、FR-5/6、FR-7、FR-8/9/10、FR-11
 与 02-工程意图 §5 完成判据 2 的规则分支。每用例独立临时数据库。
+账号模块（FR-1）的验证见同目录 test_auth.py。
 """
 import os
 import sqlite3
@@ -270,30 +271,7 @@ class ActivityTestCase(unittest.TestCase):
         finished = dict(base, status=models.STATUS_FINISHED)
         self.assertEqual(disp_status_key(finished, now="2026-01-01 00:00"), "finished")
 
-    # ================= 注册占位冒烟（FR-1） =================
-
-    def test_register_login_placeholder_smoke(self):
-        c = self.app.test_client()
-        r = c.post("/register", data={"username": "stu9", "nickname": "小九",
-                                      "password": "123456", "password2": "123456",
-                                      "role": "student"}, follow_redirects=True)
-        self.assertIn("注册成功", r.get_data(as_text=True))
-        # 重名被拒
-        r = c.post("/register", data={"username": "stu9", "nickname": "x",
-                                      "password": "123456", "password2": "123456",
-                                      "role": "student"}, follow_redirects=True)
-        self.assertIn("已被注册", r.get_data(as_text=True))
-        # 登录成功 / 密码错误
-        c.post("/login", data={"username": "stu9", "password": "123456"})
-        self.assertTrue(session_uid(c))
-        c.post("/logout")
-        c.post("/login", data={"username": "stu9", "password": "badpass"})
-        self.assertIsNone(session_uid(c))
-
-
-def session_uid(client):
-    with client.session_transaction() as s:
-        return s.get("user_id")
+    # 账号模块（FR-1）的验证见 tests/test_auth.py
 
 
 if __name__ == "__main__":
